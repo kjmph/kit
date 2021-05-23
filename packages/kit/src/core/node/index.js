@@ -7,8 +7,7 @@ export function getRawBody(req) {
 		const h = req.headers;
 
 		if (!h['content-type']) {
-			fulfil(null);
-			return;
+			return fulfil(null);
 		}
 
 		req.on('error', reject);
@@ -30,8 +29,7 @@ export function getRawBody(req) {
 		} else {
 			// https://github.com/jshttp/type-is/blob/c1f4388c71c8a01f79934e68f630ca4a15fffcd6/index.js#L81-L95
 			if (h['transfer-encoding'] === undefined) {
-				fulfil(null);
-				return;
+				return fulfil(null);
 			}
 
 			data = new Uint8Array(0);
@@ -51,8 +49,8 @@ export function getRawBody(req) {
 				return fulfil(data);
 			}
 
-			const decoder = new TextDecoder(h['content-encoding'] || 'utf-8');
-			fulfil(decoder.decode(data));
+			const encoding = h['content-encoding'] || 'utf-8';
+			fulfil(new TextDecoder(encoding).decode(data));
 		});
 	});
 }
