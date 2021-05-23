@@ -54,7 +54,7 @@ export async function start({ port, host, config, https: use_https = false, cwd 
 		assets_handler(req, res, () => {
 			static_handler(req, res, async () => {
 				try {
-					var body = await getRawBody(req);
+					var body = await getRawBody(req); // eslint-disable-line no-var
 				} catch (err) {
 					res.statusCode = err.status || 400;
 					return res.end(err.reason || 'Invalid request body');
