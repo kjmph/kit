@@ -29,9 +29,9 @@ export function createServer({ render }) {
 
 	const assets_handler = fs.existsSync(paths.assets)
 		? sirv(paths.assets, {
-				maxAge: 31536000,
-				immutable: true
-		  })
+			maxAge: 31536000,
+			immutable: true
+		})
 		: noop_handler;
 
 	const server = polka().use(
@@ -40,12 +40,20 @@ export function createServer({ render }) {
 		prerendered_handler,
 		async (req, res) => {
 			const parsed = new URL(req.url || '', 'http://localhost');
+
+			try {
+				var body = await getRawBody(req);
+			} catch (err) {
+				res.statusCode = err.status || 400;
+				return res.end(err.reason || 'Invalid request body');
+			}
+
 			const rendered = await render({
 				method: req.method,
 				headers: req.headers, // TODO: what about repeated headers, i.e. string[]
 				path: parsed.pathname,
-				rawBody: await getRawBody(req),
-				query: parsed.searchParams
+				query: parsed.searchParams,
+				rawBody: body
 			});
 
 			if (rendered) {
