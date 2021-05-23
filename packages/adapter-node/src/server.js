@@ -29,9 +29,9 @@ export function createServer({ render }) {
 
 	const assets_handler = fs.existsSync(paths.assets)
 		? sirv(paths.assets, {
-			maxAge: 31536000,
-			immutable: true
-		})
+				maxAge: 31536000,
+				immutable: true
+		  })
 		: noop_handler;
 
 	const server = polka().use(

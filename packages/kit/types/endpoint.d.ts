@@ -19,7 +19,7 @@ type JSONValue =
 	| null
 	| Date
 	| JSONValue[]
-	| { [ key: string ]: JSONValue };
+	| { [key: string]: JSONValue };
 
 export type EndpointOutput = {
 	status?: number;
