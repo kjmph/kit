@@ -7,7 +7,7 @@ export type ServerRequest<Locals = Record<string, any>, Body = unknown> = {
 	path: string;
 	params: Record<string, string>;
 	query: URLSearchParams;
-	rawBody: string | Uint8Array;
+	rawBody: string | Uint8Array | null;
 	body: ParameterizedBody<Body>;
 	locals: Locals;
 };
@@ -19,7 +19,7 @@ type JSONValue =
 	| null
 	| Date
 	| JSONValue[]
-	| { [key: string]: JSONValue };
+	| { [ key: string ]: JSONValue };
 
 export type EndpointOutput = {
 	status?: number;
