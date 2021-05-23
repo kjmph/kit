@@ -48,7 +48,7 @@ export function getRawBody(req) {
 			const [type] = h['content-type'].split(/;\s*/);
 
 			if (type === 'application/octet-stream') {
-				fulfil(data);
+				return fulfil(data);
 			}
 
 			const decoder = new TextDecoder(h['content-encoding'] || 'utf-8');
