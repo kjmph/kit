@@ -41,8 +41,10 @@ export function createServer({ render }) {
 		async (req, res) => {
 			const parsed = new URL(req.url || '', 'http://localhost');
 
+			let body;
+
 			try {
-				var body = await getRawBody(req); // eslint-disable-line no-var
+				body = await getRawBody(req);
 			} catch (err) {
 				res.statusCode = err.status || 400;
 				return res.end(err.reason || 'Invalid request body');

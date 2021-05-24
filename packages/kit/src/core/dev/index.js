@@ -153,8 +153,10 @@ class Watcher extends EventEmitter {
 					const root = (await this.vite.ssrLoadModule(`/${this.dir}/generated/root.svelte`))
 						.default;
 
+					let body;
+
 					try {
-						var body = await getRawBody(req); // eslint-disable-line no-var
+						body = await getRawBody(req);
 					} catch (err) {
 						res.statusCode = err.status || 400;
 						return res.end(err.reason || 'Invalid request body');
