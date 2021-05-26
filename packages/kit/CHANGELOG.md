@@ -1,5 +1,13 @@
 # @sveltejs/kit
 
+## 1.0.0-next.110
+
+### Patch Changes
+
+- 6372690: Add svelte-kit package command
+- bf77940: bump `polka` and `sirv` dependency versions
+- 028abd9: Pass validated svelte config to adapter adapt function
+
 ## 1.0.0-next.109
 
 ### Patch Changes

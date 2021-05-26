@@ -1,5 +1,15 @@
 # @sveltejs/adapter-cloudflare-workers
 
+## 1.0.0-next.10
+
+### Patch Changes
+
+- 028abd9: Pass validated svelte config to adapter adapt function
+- Updated dependencies [6372690]
+- Updated dependencies [bf77940]
+- Updated dependencies [028abd9]
+  - @sveltejs/kit@1.0.0-next.110
+
 ## 1.0.0-next.9
 
 ### Patch Changes
