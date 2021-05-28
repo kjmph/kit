@@ -57,6 +57,7 @@ export function createServer({ render }) {
 					for await (const event of rendered.body) {
 						if (res.connection.destroyed) break;
 						res.write(event);
+						res.flush();
 					}
 					res.end();
 				} else {
