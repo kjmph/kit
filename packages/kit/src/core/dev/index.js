@@ -17,6 +17,9 @@ import { get_server } from '../server/index.js';
 import '../../install-fetch.js';
 import { SVELTE_KIT } from '../constants.js';
 
+const AsyncGeneratorFunctionC = (async function* () {})().constructor;
+const isGenerator = (input) => AsyncGeneratorFunctionC === input.constructor;
+
 /** @typedef {{ cwd?: string, port: number, host: string, https: boolean, config: import('types/config').ValidatedConfig }} Options */
 /** @typedef {import('types/internal').SSRComponent} SSRComponent */
 
@@ -298,8 +301,15 @@ class Watcher extends EventEmitter {
 
 					if (rendered) {
 						res.writeHead(rendered.status, rendered.headers);
-						if (rendered.body) res.write(rendered.body);
-						res.end();
+						if (rendered.body && typeof rendered.body === 'object' && isGenerator(rendered.body)) {
+							for await (const event of rendered.body) {
+								if (res.connection.destroyed) break;
+								res.write(event);
+							}
+							res.end();
+						} else {
+							res.end(rendered.body);
+						}
 					} else {
 						res.statusCode = 404;
 						res.end('Not found');

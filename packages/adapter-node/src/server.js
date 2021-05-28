@@ -7,6 +7,9 @@ import sirv from 'sirv';
 import { getRawBody } from '@sveltejs/kit/node'; // eslint-disable-line import/no-unresolved
 import '@sveltejs/kit/install-fetch'; // eslint-disable-line import/no-unresolved
 
+const AsyncGeneratorFunctionC = (async function* () {})().constructor;
+const isGenerator = (input) => AsyncGeneratorFunctionC === input.constructor;
+
 // App is a dynamic file built from the application layer.
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -50,7 +53,15 @@ export function createServer({ render }) {
 
 			if (rendered) {
 				res.writeHead(rendered.status, rendered.headers);
-				res.end(rendered.body);
+				if (rendered.body && typeof rendered.body === 'object' && isGenerator(rendered.body)) {
+					for await (const event of rendered.body) {
+						if (res.connection.destroyed) break;
+						res.write(event);
+					}
+					res.end();
+				} else {
+					res.end(rendered.body);
+				}
 			} else {
 				res.statusCode = 404;
 				res.end('Not found');

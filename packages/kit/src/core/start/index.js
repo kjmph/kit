@@ -14,6 +14,9 @@ const mutable = (dir) =>
 		maxAge: 0
 	});
 
+const AsyncGeneratorFunctionC = (async function* () {})().constructor;
+const isGenerator = (input) => AsyncGeneratorFunctionC === input.constructor;
+
 /**
  * @param {{
  *   port: number;
@@ -65,8 +68,15 @@ export async function start({ port, host, config, https: use_https = false, cwd 
 
 				if (rendered) {
 					res.writeHead(rendered.status, rendered.headers);
-					if (rendered.body) res.write(rendered.body);
-					res.end();
+					if (rendered.body && typeof rendered.body === 'object' && isGenerator(rendered.body)) {
+						for await (const event of rendered.body) {
+							if (res.connection.destroyed) break;
+							res.write(event);
+						}
+						res.end();
+					} else {
+						res.end(rendered.body);
+					}
 				} else {
 					res.statusCode = 404;
 					res.end('Not found');
