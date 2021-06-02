@@ -14,9 +14,6 @@ const mutable = (dir) =>
 		maxAge: 0
 	});
 
-const AsyncGeneratorFunctionC = (async function* () {})().constructor;
-const isGenerator = (input) => AsyncGeneratorFunctionC === input.constructor;
-
 /**
  * @param {{
  *   port: number;
@@ -68,7 +65,11 @@ export async function start({ port, host, config, https: use_https = false, cwd 
 
 				if (rendered) {
 					res.writeHead(rendered.status, rendered.headers);
-					if (rendered.body && typeof rendered.body === 'object' && isGenerator(rendered.body)) {
+					if (
+						rendered.body &&
+						typeof rendered.body === 'object' &&
+						typeof rendered.body[Symbol.asyncIterator] === 'function'
+					) {
 						for await (const event of rendered.body) {
 							if (res.connection.destroyed) break;
 							res.write(event);

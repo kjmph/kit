@@ -17,9 +17,6 @@ import { get_server } from '../server/index.js';
 import '../../install-fetch.js';
 import { SVELTE_KIT } from '../constants.js';
 
-const AsyncGeneratorFunctionC = (async function* () {})().constructor;
-const isGenerator = (input) => AsyncGeneratorFunctionC === input.constructor;
-
 /** @typedef {{ cwd?: string, port: number, host: string, https: boolean, config: import('types/config').ValidatedConfig }} Options */
 /** @typedef {import('types/internal').SSRComponent} SSRComponent */
 
@@ -301,7 +298,11 @@ class Watcher extends EventEmitter {
 
 					if (rendered) {
 						res.writeHead(rendered.status, rendered.headers);
-						if (rendered.body && typeof rendered.body === 'object' && isGenerator(rendered.body)) {
+						if (
+							rendered.body &&
+							typeof rendered.body === 'object' &&
+							typeof rendered.body[Symbol.asyncIterator] === 'function'
+						) {
 							for await (const event of rendered.body) {
 								if (res.connection.destroyed) break;
 								res.write(event);

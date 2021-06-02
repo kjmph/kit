@@ -51,25 +51,14 @@ export default async function render_route(request, route) {
 				);
 			}
 
-			if (typeof body === 'function' && body.constructor.name === 'GeneratorFunction') {
-				return error(
-					`Invalid response from route ${request.path}: EventSource Generator body must be async`
-				);
-			}
-
 			/** @type {import('types/hooks').StrictBody} */
 			let normalized_body;
 
-			if (typeof body === 'object' && (!type || type === 'application/json')) {
+			if (typeof body === 'object' && typeof body[Symbol.asyncIterator] === 'function') {
+				normalized_body = /** @type {object} */ (body);
+			} else if (typeof body === 'object' && (!type || type === 'application/json')) {
 				headers = { ...headers, 'content-type': 'application/json' };
 				normalized_body = JSON.stringify(body);
-			} else if (
-				typeof body === 'function' &&
-				body.constructor.name === 'AsyncGeneratorFunction' &&
-				(!type || type === 'text/event-stream')
-			) {
-				headers = { ...headers, 'content-type': 'text/event-stream' };
-				normalized_body = /** @type {object} */ (body());
 			} else {
 				normalized_body = /** @type {import('types/hooks').StrictBody} */ (body);
 			}

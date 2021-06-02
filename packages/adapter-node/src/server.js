@@ -2,13 +2,11 @@ import fs from 'fs';
 import { dirname, join } from 'path';
 import { fileURLToPath } from 'url';
 import compression from 'compression';
+import compressible from 'compressible';
 import polka from 'polka';
 import sirv from 'sirv';
 import { getRawBody } from '@sveltejs/kit/node'; // eslint-disable-line import/no-unresolved
 import '@sveltejs/kit/install-fetch'; // eslint-disable-line import/no-unresolved
-
-const AsyncGeneratorFunctionC = (async function* () {})().constructor;
-const isGenerator = (input) => AsyncGeneratorFunctionC === input.constructor;
 
 // App is a dynamic file built from the application layer.
 
@@ -53,11 +51,16 @@ export function createServer({ render }) {
 
 			if (rendered) {
 				res.writeHead(rendered.status, rendered.headers);
-				if (rendered.body && typeof rendered.body === 'object' && isGenerator(rendered.body)) {
+				if (
+					rendered.body &&
+					typeof rendered.body === 'object' &&
+					typeof rendered.body[Symbol.asyncIterator] === 'function'
+				) {
+					const flush = compressible(rendered.headers['content-type']) ? res.flush : null;
 					for await (const event of rendered.body) {
 						if (res.connection.destroyed) break;
 						res.write(event);
-						res.flush();
+						flush?.();
 					}
 					res.end();
 				} else {
