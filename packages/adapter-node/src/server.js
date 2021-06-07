@@ -57,9 +57,24 @@ export function createServer({ render }) {
 					typeof rendered.body[Symbol.asyncIterator] === 'function'
 				) {
 					const flush = compressible(rendered.headers['content-type']) ? res.flush : null;
+					const drainers = [];
+					const writer = (event) =>
+						new Promise((resolve) => {
+							if (!res.write(event)) {
+								drainers.push(resolve);
+							} else {
+								resolve();
+							}
+						});
+					// FIXME: upstream bug in compression prevents usage
+					// of res.once('drain', resolve) in writer's curry.
+					// https://github.com/expressjs/compression/pull/153
+					res.on('drain', () => {
+						drainers.splice(0, drainers.length).forEach((resolve) => resolve());
+					});
 					for await (const event of rendered.body) {
 						if (res.connection.destroyed) break;
-						res.write(event);
+						await writer(event);
 						flush?.();
 					}
 					res.end();
